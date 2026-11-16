@@ -2,6 +2,7 @@ export * from "./achievement";
 export * from "./daily-challenge";
 export * from "./game-state";
 export * from "./genre";
+export * from "./guess-result";
 export * from "./hint";
 export * from "./mode";
 export * from "./modifier";

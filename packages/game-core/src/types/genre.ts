@@ -13,6 +13,9 @@ export const GENRE_IDS = [
 
 export type GenreId = (typeof GENRE_IDS)[number];
 
+/** Public game-domain name. `GenreId` remains as a backwards-compatible alias. */
+export type Genre = GenreId;
+
 export interface GenreDefinition {
   id: GenreId;
   label: string;

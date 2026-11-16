@@ -1,21 +1,27 @@
-import type { GenreId } from "./genre";
+import type { Genre } from "./genre";
 
 export type WordId = string;
+export type WordDifficulty = 1 | 2 | 3 | 4 | 5;
+export type PlayableGenre = Exclude<Genre, "surprise-me">;
 
 export interface WordEntry {
   id: WordId;
+  /** Canonical answer used for validation and full-answer guesses. */
   answer: string;
-  genreId: Exclude<GenreId, "surprise-me">;
+  /** Presentation-safe answer, preserving capitalization and punctuation. */
+  displayAnswer: string;
+  genre: PlayableGenre;
+  difficulty: WordDifficulty;
+  hint?: string;
   alternateAnswers?: readonly string[];
-  difficulty: 1 | 2 | 3 | 4 | 5;
-  hintIds: readonly string[];
-  metadata?: Readonly<Record<string, string>>;
+  metadata?: Readonly<Record<string, boolean | number | string>>;
 }
 
 export interface WordQuery {
-  genreId: GenreId;
+  genre: Genre;
   excludeWordIds?: readonly WordId[];
-  maximumDifficulty?: WordEntry["difficulty"];
+  difficulty?: WordDifficulty;
+  maximumDifficulty?: WordDifficulty;
 }
 
 export interface WordRepository {

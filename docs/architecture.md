@@ -20,14 +20,16 @@ Dependencies flow from clients toward framework-free packages. `game-core` must 
 
 The adapter contracts are asynchronous so both browser and React Native implementations can conform without leaking platform behavior into game logic.
 
-## Next engine phase
+## Game engine
 
-Implement the game state machine under `packages/game-core/src/engine`. It should accept all nondeterministic inputs—such as time, random seeds, and selected words—as values or injected interfaces. Engine transitions should return a new immutable state plus domain events. Persistence, sound, haptics, analytics, sharing, React state, and navigation remain responsibilities of client orchestration code.
+The base state machine lives under `packages/game-core/src/engine`. It accepts nondeterministic inputs—time, randomness, and round IDs—through injected functions. Guess operations return immutable previous/current state snapshots plus domain events. Persistence, sound, haptics, analytics, sharing, React state, and navigation remain responsibilities of client orchestration code.
 
-Recommended first tests:
+The engine currently covers:
 
-1. Game creation is deterministic for a seed and configuration.
-2. Letter normalization and duplicate guesses are validated.
-3. Correct and incorrect guesses produce the expected immutable transition.
-4. Win, loss, pause, resume, and abandon transitions reject invalid actions.
-5. Each mode, hint, scoring policy, and modifier is independently testable.
+1. Genre/difficulty-based word selection with exclusions.
+2. Phrase masking with automatic spaces and punctuation.
+3. Letter and full-answer guesses, including invalid and duplicate input.
+4. Attempt tracking and win/loss transitions.
+5. Same-word resets and newly selected rounds.
+
+Mode-specific hints, scoring, Ultra rules, and Ultra Max modifiers should consume these states and events rather than adding platform behavior to the engine.

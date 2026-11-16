@@ -1,1 +1,1 @@
-export type { WordEntry, WordQuery, WordRepository } from "../types/word";
+export type { WordDifficulty, WordEntry, WordQuery, WordRepository } from "../types/word";

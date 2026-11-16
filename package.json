@@ -10,8 +10,9 @@
     "dev": "npm run dev --workspace @hangman/web",
     "build": "npm run build --workspace @hangman/web",
     "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "check": "npm run lint && npm run typecheck && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "engines": {
     "node": ">=20.9.0"
