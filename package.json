@@ -1,0 +1,19 @@
+{
+  "name": "hangman-game",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @hangman/web",
+    "build": "npm run build --workspace @hangman/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "check": "npm run lint && npm run typecheck && npm run build"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
