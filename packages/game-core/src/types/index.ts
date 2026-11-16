@@ -7,4 +7,5 @@ export * from "./hint";
 export * from "./mode";
 export * from "./modifier";
 export * from "./scoring";
+export * from "./timer";
 export * from "./word";

@@ -21,3 +21,17 @@ if (result.state.status === "won") {
 ```
 
 Time, randomness, and round ID generation can be injected for deterministic tests and seeded challenges. Guess results contain immutable previous/current snapshots and domain events that future scoring, achievements, and mode-specific layers can consume.
+
+## Difficulty modes
+
+All mode balancing lives in `src/config/modes.ts`:
+
+| Mode | Attempts | Timer | Wrong-guess time penalty | Word pool | Score |
+| --- | ---: | ---: | ---: | --- | ---: |
+| I Know This Game | 7 | None | None | Difficulty 1–3 | 1x |
+| Ultra | 5 | 60s | 5s | Difficulty 3–4 | 2x |
+| Ultra Max | 4 | 45s | 7s | Difficulty 4–5 | 4x |
+
+The engine never creates a timer. A client advances timed rounds by calling `advanceTime(elapsedSeconds)`, which keeps the rules reusable in browsers, React Native, tests, and background-safe orchestration.
+
+Ultra Max selects one weighted modifier per round. Every modifier has its own typed factory and configuration in `src/modifiers/mechanics`; changing or disabling one mechanic does not alter the others. The selected modifier and its frozen configuration are included in `GameState.modifiers` for modifier-specific state layers to consume.

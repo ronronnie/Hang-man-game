@@ -4,7 +4,7 @@ export * from "./daily-challenge/daily-challenge-policy";
 export * from "./engine/index";
 export * from "./hints/hint-policy";
 export * from "./modes/ruleset";
-export * from "./modifiers/registry";
+export * from "./modifiers/index";
 export * from "./scoring/scoring-policy";
 export * from "./streaks/streak-policy";
 export * from "./types/index";

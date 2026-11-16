@@ -21,6 +21,7 @@ export interface WordQuery {
   genre: Genre;
   excludeWordIds?: readonly WordId[];
   difficulty?: WordDifficulty;
+  minimumDifficulty?: WordDifficulty;
   maximumDifficulty?: WordDifficulty;
 }
 

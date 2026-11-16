@@ -94,18 +94,18 @@ describe("HangmanGameEngine", () => {
     expect(correct.newlyRevealed).toBe(2);
     expect(correct.state.maskedAnswer).toBe("T__ ____ _____t");
     expect(incorrect.outcome).toBe("incorrect");
-    expect(incorrect.state.remainingAttempts).toBe(5);
+    expect(incorrect.state.remainingAttempts).toBe(6);
     expect(incorrect.state.incorrectLetters).toEqual(["Z"]);
     expect(duplicate.outcome).toBe("already-guessed");
     expect(duplicate.state.turn).toBe(2);
-    expect(duplicate.state.remainingAttempts).toBe(5);
+    expect(duplicate.state.remainingAttempts).toBe(6);
   });
 
   it("does not consume an attempt for invalid guesses", () => {
     const engine = createTestEngine({ genre: "movies" });
     expect(engine.guessLetter("AB").outcome).toBe("invalid");
     expect(engine.guessLetter("-").outcome).toBe("invalid");
-    expect(engine.getState().remainingAttempts).toBe(6);
+    expect(engine.getState().remainingAttempts).toBe(7);
   });
 
   it("wins when every guessable character is revealed", () => {
@@ -171,7 +171,126 @@ describe("HangmanGameEngine", () => {
 
     expect(result.outcome).toBe("incorrect");
     expect(result.attemptsConsumed).toBe(1);
-    expect(result.state.remainingAttempts).toBe(5);
+    expect(result.state.remainingAttempts).toBe(6);
+  });
+
+  it("applies Ultra attempts, timer penalties, and time progression", () => {
+    const engine = createTestEngine({
+      mode: "ultra",
+      genre: "movies",
+      words: [
+        {
+          id: "hard-movie",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: 4,
+        },
+      ],
+    });
+
+    expect(engine.getState().maximumAttempts).toBe(5);
+    expect(engine.getState().timer?.remainingSeconds).toBe(60);
+
+    const guess = engine.guessLetter("z");
+    expect(guess.state.remainingAttempts).toBe(4);
+    expect(guess.state.timer?.remainingSeconds).toBe(55);
+    expect(guess.events).toContainEqual({ type: "TIME_PENALTY_APPLIED", seconds: 5 });
+
+    const time = engine.advanceTime(10);
+    expect(time.consumedSeconds).toBe(10);
+    expect(time.state.timer?.remainingSeconds).toBe(45);
+  });
+
+  it("uses the harder word pool for Ultra", () => {
+    const engine = createTestEngine({
+      mode: "ultra",
+      genre: "movies",
+      words: [
+        words[0],
+        {
+          id: "hard-movie",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: 4,
+        },
+      ],
+    });
+
+    expect(engine.getState().word.id).toBe("hard-movie");
+  });
+
+  it("activates exactly one Ultra Max modifier and applies Time Attack", () => {
+    const randomValues = [0.65, 0];
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      genre: "movies",
+      random: () => randomValues.shift() ?? 0,
+      words: [
+        {
+          id: "hardest-movie",
+          answer: "INTERSTELLAR",
+          displayAnswer: "Interstellar",
+          genre: "movies",
+          difficulty: 5,
+        },
+      ],
+    });
+
+    const state = engine.getState();
+    expect(state.maximumAttempts).toBe(4);
+    expect(state.modifiers).toHaveLength(1);
+    expect(state.modifiers[0]?.id).toBe("time-attack");
+    expect(state.timer?.rateMultiplier).toBe(1.5);
+
+    const result = engine.advanceTime(10);
+    expect(result.consumedSeconds).toBe(15);
+    expect(result.state.timer?.remainingSeconds).toBe(30);
+  });
+
+  it("keeps a modifier on reset and selects one modifier again for a new round", () => {
+    const randomValues = [0, 0, 0.99, 0, 0];
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      genre: "movies",
+      random: () => randomValues.shift() ?? 0,
+      words: [
+        {
+          id: "hardest-movie",
+          answer: "INTERSTELLAR",
+          displayAnswer: "Interstellar",
+          genre: "movies",
+          difficulty: 5,
+        },
+      ],
+    });
+
+    expect(engine.getState().modifiers[0]?.id).toBe("memory");
+    expect(engine.resetRound().modifiers[0]?.id).toBe("memory");
+    expect(engine.startNewRound().modifiers).toHaveLength(1);
+    expect(engine.getState().modifiers[0]?.id).toBe("double-trouble");
+  });
+
+  it("loses a timed round when the timer reaches zero", () => {
+    const engine = createTestEngine({
+      mode: "ultra",
+      genre: "movies",
+      words: [
+        {
+          id: "hard-movie",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: 4,
+        },
+      ],
+    });
+
+    const result = engine.advanceTime(60);
+    expect(result.state.status).toBe("lost");
+    expect(result.state.timer?.remainingSeconds).toBe(0);
+    expect(engine.guessLetter("i").outcome).toBe("round-complete");
   });
 
   it("resets the same round and starts a new round with another word", () => {

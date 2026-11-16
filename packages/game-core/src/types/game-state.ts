@@ -3,6 +3,7 @@ import type { HintState } from "./hint";
 import type { GameMode } from "./mode";
 import type { ActiveModifier } from "./modifier";
 import type { ScoreBreakdown, StreakState } from "./scoring";
+import type { GameTimerState } from "./timer";
 import type { WordEntry } from "./word";
 
 export type GameStatus = "ready" | "playing" | "paused" | "won" | "lost" | "abandoned";
@@ -21,6 +22,7 @@ export interface GameState {
   incorrectLetters: readonly string[];
   remainingAttempts: number;
   maximumAttempts: number;
+  timer: Readonly<GameTimerState> | null;
   turn: number;
   hints: HintState;
   modifiers: readonly ActiveModifier[];
@@ -54,6 +56,9 @@ export type GameEvent =
   | { type: "ANSWER_ACCEPTED"; correct: boolean }
   | { type: "ROUND_RESET"; roundId: string }
   | { type: "ROUND_STARTED"; roundId: string; wordId: string }
+  | { type: "TIME_ADVANCED"; elapsedRealSeconds: number; consumedSeconds: number }
+  | { type: "TIME_PENALTY_APPLIED"; seconds: number }
+  | { type: "MODIFIER_ACTIVATED"; modifierId: ActiveModifier["id"] }
   | { type: "HINT_USED"; hintId: string }
   | { type: "STATUS_CHANGED"; from: GameStatus; to: GameStatus }
   | { type: "SCORE_CHANGED"; difference: number };

@@ -5,6 +5,7 @@ import { validateWordEntry } from "./answer";
 export interface SelectWordOptions {
   genre: Genre;
   difficulty?: WordDifficulty;
+  minimumDifficulty?: WordDifficulty;
   maximumDifficulty?: WordDifficulty;
   excludeWordIds?: readonly WordId[];
   randomValue?: number;
@@ -12,7 +13,14 @@ export interface SelectWordOptions {
 
 export function selectWord(
   words: readonly WordEntry[],
-  { genre, difficulty, maximumDifficulty, excludeWordIds = [], randomValue = Math.random() }: SelectWordOptions,
+  {
+    genre,
+    difficulty,
+    minimumDifficulty,
+    maximumDifficulty,
+    excludeWordIds = [],
+    randomValue = Math.random(),
+  }: SelectWordOptions,
 ): WordEntry | null {
   if (!Number.isFinite(randomValue) || randomValue < 0 || randomValue >= 1) {
     throw new RangeError("randomValue must be greater than or equal to 0 and less than 1");
@@ -25,6 +33,7 @@ export function selectWord(
       !excluded.has(word.id) &&
       (genre === "surprise-me" || word.genre === genre) &&
       (difficulty === undefined || word.difficulty === difficulty) &&
+      (minimumDifficulty === undefined || word.difficulty >= minimumDifficulty) &&
       (maximumDifficulty === undefined || word.difficulty <= maximumDifficulty)
     );
   });

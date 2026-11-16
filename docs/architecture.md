@@ -33,3 +33,5 @@ The engine currently covers:
 5. Same-word resets and newly selected rounds.
 
 Mode-specific hints, scoring, Ultra rules, and Ultra Max modifiers should consume these states and events rather than adding platform behavior to the engine.
+
+Mode balancing is centralized in `packages/game-core/src/config/modes.ts`. The engine reads attempts, timer rules, difficulty ranges, and modifier-selection policy from this configuration. Ultra Max modifier definitions live separately under `packages/game-core/src/modifiers/mechanics`, allowing each mechanic to be configured and tested independently while the mode configuration controls which definitions are eligible.
