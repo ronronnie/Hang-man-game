@@ -1,8 +1,9 @@
-import type { Genre } from "./genre";
+import type { PlayableCategoryId } from "./category";
 
 export type WordId = string;
 export type WordDifficulty = 1 | 2 | 3 | 4 | 5;
-export type PlayableGenre = Exclude<Genre, "surprise-me">;
+/** @deprecated Prefer `PlayableCategoryId`. */
+export type PlayableGenre = PlayableCategoryId;
 
 export interface WordEntry {
   id: WordId;
@@ -10,7 +11,7 @@ export interface WordEntry {
   answer: string;
   /** Presentation-safe answer, preserving capitalization and punctuation. */
   displayAnswer: string;
-  genre: PlayableGenre;
+  genre: PlayableCategoryId;
   difficulty: WordDifficulty;
   hint?: string;
   alternateAnswers?: readonly string[];
@@ -18,7 +19,6 @@ export interface WordEntry {
 }
 
 export interface WordQuery {
-  genre: Genre;
   excludeWordIds?: readonly WordId[];
   difficulty?: WordDifficulty;
   minimumDifficulty?: WordDifficulty;

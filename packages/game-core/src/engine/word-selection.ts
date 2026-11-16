@@ -1,9 +1,7 @@
-import type { Genre } from "../types/genre";
 import type { WordDifficulty, WordEntry, WordId } from "../types/word";
 import { validateWordEntry } from "./answer";
 
 export interface SelectWordOptions {
-  genre: Genre;
   difficulty?: WordDifficulty;
   minimumDifficulty?: WordDifficulty;
   maximumDifficulty?: WordDifficulty;
@@ -14,7 +12,6 @@ export interface SelectWordOptions {
 export function selectWord(
   words: readonly WordEntry[],
   {
-    genre,
     difficulty,
     minimumDifficulty,
     maximumDifficulty,
@@ -31,7 +28,6 @@ export function selectWord(
     validateWordEntry(word);
     return (
       !excluded.has(word.id) &&
-      (genre === "surprise-me" || word.genre === genre) &&
       (difficulty === undefined || word.difficulty === difficulty) &&
       (minimumDifficulty === undefined || word.difficulty >= minimumDifficulty) &&
       (maximumDifficulty === undefined || word.difficulty <= maximumDifficulty)

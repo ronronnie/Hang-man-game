@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./categories": "./src/categories/index.ts",
     "./config": "./src/config/index.ts",
     "./engine": "./src/engine/index.ts",
     "./modifiers": "./src/modifiers/index.ts",

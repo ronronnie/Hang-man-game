@@ -54,16 +54,16 @@ describe("answer utilities", () => {
 });
 
 describe("word selection", () => {
-  it("selects deterministically by genre and difficulty", () => {
-    expect(selectWord(words, { genre: "sports", difficulty: 3, randomValue: 0 })?.id).toBe(
+  it("selects deterministically from the supplied pool by difficulty", () => {
+    expect(selectWord(words, { difficulty: 3, randomValue: 0 })?.id).toBe(
       "manchester-united",
     );
-    expect(selectWord(words, { genre: "movies", difficulty: 5, randomValue: 0 })).toBeNull();
+    expect(selectWord(words, { difficulty: 5, randomValue: 0 })).toBeNull();
   });
 
-  it("supports Surprise Me and exclusions", () => {
+  it("supports exclusions without knowing category selection", () => {
     expect(
-      selectWord(words, { genre: "surprise-me", excludeWordIds: ["dark-knight"], randomValue: 0 })?.id,
+      selectWord(words, { excludeWordIds: ["dark-knight"], randomValue: 0 })?.id,
     ).toBe("gta");
   });
 });
@@ -76,7 +76,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("starts with a hidden phrase and configured attempts", () => {
-    const state = createTestEngine({ genre: "movies", maximumAttempts: 7 }).getState();
+    const state = createTestEngine({ maximumAttempts: 7 }).getState();
 
     expect(state.status).toBe("playing");
     expect(state.maskedAnswer).toBe("___ ____ ______");
@@ -85,7 +85,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("tracks correct, incorrect, and duplicate letter guesses", () => {
-    const engine = createTestEngine({ genre: "movies" });
+    const engine = createTestEngine();
     const correct = engine.guessLetter("t");
     const incorrect = engine.guessLetter("z");
     const duplicate = engine.guessLetter("T");
@@ -102,7 +102,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("does not consume an attempt for invalid guesses", () => {
-    const engine = createTestEngine({ genre: "movies" });
+    const engine = createTestEngine();
     expect(engine.guessLetter("AB").outcome).toBe("invalid");
     expect(engine.guessLetter("-").outcome).toBe("invalid");
     expect(engine.getState().remainingAttempts).toBe(7);
@@ -147,7 +147,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("loses when no attempts remain", () => {
-    const engine = createTestEngine({ genre: "movies", maximumAttempts: 2 });
+    const engine = createTestEngine({ maximumAttempts: 2 });
     engine.guessLetter("z");
     const result = engine.guessLetter("q");
 
@@ -157,7 +157,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("solves a full phrase without requiring matching punctuation or case", () => {
-    const engine = createTestEngine({ genre: "video-games" });
+    const engine = createTestEngine({ words: [words[1]] });
     const result = engine.solveWord("grand-theft auto!");
 
     expect(result.correct).toBe(true);
@@ -166,7 +166,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("charges one attempt for an incorrect full-word solve", () => {
-    const engine = createTestEngine({ genre: "sports" });
+    const engine = createTestEngine({ words: [words[2]] });
     const result = engine.solveWord("Manchester City");
 
     expect(result.outcome).toBe("incorrect");
@@ -177,7 +177,6 @@ describe("HangmanGameEngine", () => {
   it("applies Ultra attempts, timer penalties, and time progression", () => {
     const engine = createTestEngine({
       mode: "ultra",
-      genre: "movies",
       words: [
         {
           id: "hard-movie",
@@ -205,7 +204,6 @@ describe("HangmanGameEngine", () => {
   it("uses the harder word pool for Ultra", () => {
     const engine = createTestEngine({
       mode: "ultra",
-      genre: "movies",
       words: [
         words[0],
         {
@@ -225,7 +223,6 @@ describe("HangmanGameEngine", () => {
     const randomValues = [0.65, 0];
     const engine = createTestEngine({
       mode: "ultra-max",
-      genre: "movies",
       random: () => randomValues.shift() ?? 0,
       words: [
         {
@@ -253,7 +250,6 @@ describe("HangmanGameEngine", () => {
     const randomValues = [0, 0, 0.99, 0, 0];
     const engine = createTestEngine({
       mode: "ultra-max",
-      genre: "movies",
       random: () => randomValues.shift() ?? 0,
       words: [
         {
@@ -275,7 +271,6 @@ describe("HangmanGameEngine", () => {
   it("loses a timed round when the timer reaches zero", () => {
     const engine = createTestEngine({
       mode: "ultra",
-      genre: "movies",
       words: [
         {
           id: "hard-movie",

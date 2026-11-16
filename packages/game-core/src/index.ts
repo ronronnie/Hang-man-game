@@ -1,4 +1,5 @@
 export * from "./achievements/achievement-policy";
+export * from "./categories/index";
 export * from "./config/index";
 export * from "./daily-challenge/daily-challenge-policy";
 export * from "./engine/index";

@@ -1,4 +1,4 @@
-import type { Genre } from "./genre";
+import type { PlayableCategoryId } from "./category";
 import type { HintState } from "./hint";
 import type { GameMode } from "./mode";
 import type { ActiveModifier } from "./modifier";
@@ -15,7 +15,8 @@ export interface GameState {
   roundNumber: number;
   status: GameStatus;
   mode: GameMode;
-  genre: Genre;
+  /** The selected word's concrete category; Surprise Me is resolved before engine creation. */
+  genre: PlayableCategoryId;
   word: Readonly<WordEntry>;
   maskedAnswer: string;
   guessedLetters: readonly string[];

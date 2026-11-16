@@ -5,11 +5,12 @@ Platform-independent domain package for the game. It contains the base Hangman e
 This package may depend on plain TypeScript and cross-platform contracts, but it must not depend on React, Next.js, React Native, DOM APIs, storage APIs, or animation libraries.
 
 ```ts
-import { createGameEngine } from "@hangman/game-core";
+import { createCategoryWordPool, createGameEngine } from "@hangman/game-core";
+
+const wordPool = createCategoryWordPool(words, "movies");
 
 const engine = createGameEngine({
-  words,
-  genre: "movies",
+  words: wordPool,
   maximumAttempts: 6,
 });
 
@@ -21,6 +22,12 @@ if (result.state.status === "won") {
 ```
 
 Time, randomness, and round ID generation can be injected for deterministic tests and seeded challenges. Guess results contain immutable previous/current snapshots and domain events that future scoring, achievements, and mode-specific layers can consume.
+
+## Categories
+
+Card-ready category metadata lives in `src/config/categories.ts`. Icon and artwork values are platform-neutral identifiers, so web and mobile clients can map them to their own assets and components.
+
+Category selection is deliberately outside the game engine. `createCategoryWordPool` resolves a direct category—or all enabled direct categories for Surprise Me—into a `WordEntry[]`. That pool is then supplied to `createGameEngine`, which only applies game and difficulty rules.
 
 ## Difficulty modes
 

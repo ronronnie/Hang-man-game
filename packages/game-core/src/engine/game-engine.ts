@@ -1,5 +1,4 @@
 import type { GameEvent, GameState, GameStatus } from "../types/game-state";
-import type { Genre } from "../types/genre";
 import type { GuessKind, GuessOutcome, GuessResult } from "../types/guess-result";
 import type { ActiveModifier } from "../types/modifier";
 import type { GameMode, GameModeRules } from "../types/mode";
@@ -23,7 +22,6 @@ export interface GameEngineConfig {
   words: readonly WordEntry[];
   gameId?: string;
   mode?: GameMode;
-  genre?: Genre;
   difficulty?: WordDifficulty;
   maximumAttempts?: number;
   random?: () => number;
@@ -32,7 +30,6 @@ export interface GameEngineConfig {
 }
 
 export interface StartNewRoundOptions {
-  genre?: Genre;
   difficulty?: WordDifficulty;
   maximumAttempts?: number;
   excludeWordIds?: readonly WordId[];
@@ -55,7 +52,6 @@ export class HangmanGameEngine implements GameEngine {
   private readonly gameId: string;
   private readonly mode: GameMode;
   private readonly modeRules: Readonly<GameModeRules>;
-  private genre: Genre;
   private difficulty?: WordDifficulty;
   private maximumAttempts: number;
   private state!: Readonly<GameState>;
@@ -72,7 +68,6 @@ export class HangmanGameEngine implements GameEngine {
     this.gameId = config.gameId ?? `game-${Date.now()}`;
     this.mode = config.mode ?? "i-know-this-game";
     this.modeRules = GAME_MODES_BY_ID[this.mode].rules;
-    this.genre = config.genre ?? "surprise-me";
     this.difficulty = config.difficulty;
     this.maximumAttempts = assertMaximumAttempts(
       config.maximumAttempts ?? this.modeRules.maximumIncorrectGuesses,
@@ -241,7 +236,6 @@ export class HangmanGameEngine implements GameEngine {
       roundNumber: this.state.roundNumber,
       word: this.state.word,
       mode: this.mode,
-      genre: this.genre,
       maximumAttempts: this.maximumAttempts,
       modeRules: this.modeRules,
       modifiers: this.state.modifiers,
@@ -251,7 +245,6 @@ export class HangmanGameEngine implements GameEngine {
   }
 
   startNewRound(options: StartNewRoundOptions = {}): Readonly<GameState> {
-    this.genre = options.genre ?? this.genre;
     this.difficulty = options.difficulty ?? this.difficulty;
     this.maximumAttempts = assertMaximumAttempts(options.maximumAttempts ?? this.maximumAttempts);
 
@@ -260,7 +253,6 @@ export class HangmanGameEngine implements GameEngine {
     const modifiers = this.selectRoundModifiers();
     const wordPool = this.modeRules.wordPool;
     const selectionOptions = {
-      genre: this.genre,
       difficulty: this.difficulty,
       minimumDifficulty: this.difficulty === undefined ? wordPool.minimumDifficulty : undefined,
       maximumDifficulty: this.difficulty === undefined ? wordPool.maximumDifficulty : undefined,
@@ -272,7 +264,7 @@ export class HangmanGameEngine implements GameEngine {
       selectWord(this.words, { ...selectionOptions, excludeWordIds: [], randomValue: this.random() });
 
     if (!word) {
-      throw new Error(`No words are available for genre "${this.genre}" and the requested difficulty`);
+      throw new Error("No words are available in the supplied pool for the requested difficulty");
     }
 
     const roundNumber = (this.state?.roundNumber ?? 0) + 1;
@@ -282,7 +274,6 @@ export class HangmanGameEngine implements GameEngine {
       roundNumber,
       word,
       mode: this.mode,
-      genre: this.genre,
       maximumAttempts: this.maximumAttempts,
       modeRules: this.modeRules,
       modifiers,
@@ -332,7 +323,6 @@ interface CreateRoundStateOptions {
   roundNumber: number;
   word: WordEntry;
   mode: GameMode;
-  genre: Genre;
   maximumAttempts: number;
   modeRules: Readonly<GameModeRules>;
   modifiers: readonly ActiveModifier[];
@@ -347,7 +337,7 @@ function createRoundState(options: CreateRoundStateOptions): Readonly<GameState>
     roundNumber: options.roundNumber,
     status: "playing",
     mode: options.mode,
-    genre: options.genre,
+    genre: options.word.genre,
     word: options.word,
     maskedAnswer: maskAnswer(options.word.displayAnswer),
     guessedLetters: [],

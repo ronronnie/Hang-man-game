@@ -1,4 +1,5 @@
 export * from "./achievement";
+export * from "./category";
 export * from "./daily-challenge";
 export * from "./game-state";
 export * from "./genre";

@@ -1,5 +1,5 @@
 import type { WordEntry } from "../types/word";
-import { GENRE_IDS } from "../types/genre";
+import { isPlayableCategoryId } from "../validation/identifiers";
 
 const GUESSABLE_CHARACTER = /^[\p{L}\p{N}]$/u;
 
@@ -65,7 +65,7 @@ export function matchesWordAnswer(word: WordEntry, guess: string): boolean {
 export function validateWordEntry(word: WordEntry): void {
   if (!word.id.trim()) throw new Error("WordEntry.id must not be empty");
   const genre: string = word.genre;
-  if (genre === "surprise-me" || !(GENRE_IDS as readonly string[]).includes(genre)) {
+  if (!isPlayableCategoryId(genre)) {
     throw new Error(`WordEntry "${word.id}" has an invalid playable genre`);
   }
   if (!Number.isInteger(word.difficulty) || word.difficulty < 1 || word.difficulty > 5) {

@@ -1,4 +1,4 @@
-import { GenreList } from "@/components/game/genre-list";
+import { CategoryList } from "@/components/game/category-list";
 import { ModeList } from "@/components/game/mode-list";
 
 export function GameSetupScreen() {
@@ -12,12 +12,12 @@ export function GameSetupScreen() {
         <h2 className="text-lg font-medium" id="modes-heading">Modes</h2>
         <ModeList />
       </section>
-      <section aria-labelledby="genres-heading" className="space-y-4">
-        <h2 className="text-lg font-medium" id="genres-heading">Genres</h2>
-        <GenreList />
+      <section aria-labelledby="categories-heading" className="space-y-4">
+        <h2 className="text-lg font-medium" id="categories-heading">Categories</h2>
+        <CategoryList />
       </section>
       <p className="text-sm text-[var(--muted)]">
-        Selection and gameplay will be connected when the game engine is implemented.
+        Category selection will provide a word pool to the platform-independent game engine.
       </p>
     </div>
   );

@@ -26,7 +26,7 @@ The base state machine lives under `packages/game-core/src/engine`. It accepts n
 
 The engine currently covers:
 
-1. Genre/difficulty-based word selection with exclusions.
+1. Difficulty-based word selection with exclusions from a client-supplied pool.
 2. Phrase masking with automatic spaces and punctuation.
 3. Letter and full-answer guesses, including invalid and duplicate input.
 4. Attempt tracking and win/loss transitions.
@@ -35,3 +35,9 @@ The engine currently covers:
 Mode-specific hints, scoring, Ultra rules, and Ultra Max modifiers should consume these states and events rather than adding platform behavior to the engine.
 
 Mode balancing is centralized in `packages/game-core/src/config/modes.ts`. The engine reads attempts, timer rules, difficulty ranges, and modifier-selection policy from this configuration. Ultra Max modifier definitions live separately under `packages/game-core/src/modifiers/mechanics`, allowing each mechanic to be configured and tested independently while the mode configuration controls which definitions are eligible.
+
+## Category boundary
+
+Category metadata is centralized in `packages/game-core/src/config/categories.ts`. Definitions use semantic icon and artwork identifiers instead of React components or browser assets, keeping them reusable by the future mobile client.
+
+`packages/game-core/src/categories` translates a category choice into a word pool. Direct categories filter to their own entries; Surprise Me combines entries from every enabled direct category. Client orchestration passes that resulting pool to the engine. The engine never branches on a category or contains Surprise Me behavior, and `GameState.genre` records only the concrete category of the selected word.
