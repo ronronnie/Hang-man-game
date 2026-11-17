@@ -16,8 +16,7 @@ export type WordPoolDifficulty = "normal" | "harder" | "hardest";
 
 export interface WordPoolRules {
   tier: WordPoolDifficulty;
-  minimumDifficulty: WordDifficulty;
-  maximumDifficulty: WordDifficulty;
+  difficulties: readonly WordDifficulty[];
 }
 
 export interface GameModeRules {

@@ -1,7 +1,8 @@
 import type { PlayableCategoryId } from "./category";
 
 export type WordId = string;
-export type WordDifficulty = 1 | 2 | 3 | 4 | 5;
+export const WORD_DIFFICULTIES = ["easy", "medium", "hard", "brutal"] as const;
+export type WordDifficulty = (typeof WORD_DIFFICULTIES)[number];
 /** @deprecated Prefer `PlayableCategoryId`. */
 export type PlayableGenre = PlayableCategoryId;
 
@@ -21,8 +22,7 @@ export interface WordEntry {
 export interface WordQuery {
   excludeWordIds?: readonly WordId[];
   difficulty?: WordDifficulty;
-  minimumDifficulty?: WordDifficulty;
-  maximumDifficulty?: WordDifficulty;
+  difficulties?: readonly WordDifficulty[];
 }
 
 export interface WordRepository {

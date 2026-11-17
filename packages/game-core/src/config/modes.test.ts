@@ -11,6 +11,7 @@ describe("game mode configuration", () => {
     expect(rules.categoryVisibility).toBe("always");
     expect(rules.hints.freeHints).toBe(1);
     expect(rules.wordPool.tier).toBe("normal");
+    expect(rules.wordPool.difficulties).toEqual(["easy", "medium"]);
     expect(rules.scoreMultiplier).toBe(1);
     expect(rules.modifierSelection).toBeNull();
   });
@@ -22,6 +23,7 @@ describe("game mode configuration", () => {
     expect(rules.categoryVisibility).toBe("always");
     expect(rules.hints).toMatchObject({ enabled: true, reducesFinalScore: true });
     expect(rules.wordPool.tier).toBe("harder");
+    expect(rules.wordPool.difficulties).toEqual(["medium", "hard"]);
     expect(rules.scoreMultiplier).toBe(2);
   });
 
@@ -33,6 +35,7 @@ describe("game mode configuration", () => {
     expect(rules.hints.freeHints).toBe(0);
     expect(rules.hints.costOptions).toEqual(["time", "score"]);
     expect(rules.wordPool.tier).toBe("hardest");
+    expect(rules.wordPool.difficulties).toEqual(["hard", "brutal"]);
     expect(rules.scoreMultiplier).toBe(4);
     expect(rules.supportsPhrases).toBe(true);
     expect(rules.modifierSelection).toMatchObject({ count: 1 });

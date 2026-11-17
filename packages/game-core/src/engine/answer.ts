@@ -1,4 +1,5 @@
 import type { WordEntry } from "../types/word";
+import { WORD_DIFFICULTIES } from "../types/word";
 import { isPlayableCategoryId } from "../validation/identifiers";
 
 const GUESSABLE_CHARACTER = /^[\p{L}\p{N}]$/u;
@@ -68,8 +69,10 @@ export function validateWordEntry(word: WordEntry): void {
   if (!isPlayableCategoryId(genre)) {
     throw new Error(`WordEntry "${word.id}" has an invalid playable genre`);
   }
-  if (!Number.isInteger(word.difficulty) || word.difficulty < 1 || word.difficulty > 5) {
-    throw new Error(`WordEntry "${word.id}" difficulty must be an integer from 1 to 5`);
+  if (!(WORD_DIFFICULTIES as readonly string[]).includes(word.difficulty)) {
+    throw new Error(
+      `WordEntry "${word.id}" difficulty must be easy, medium, hard, or brutal`,
+    );
   }
 
   const answer = normalizeAnswer(word.answer);

@@ -254,8 +254,7 @@ export class HangmanGameEngine implements GameEngine {
     const wordPool = this.modeRules.wordPool;
     const selectionOptions = {
       difficulty: this.difficulty,
-      minimumDifficulty: this.difficulty === undefined ? wordPool.minimumDifficulty : undefined,
-      maximumDifficulty: this.difficulty === undefined ? wordPool.maximumDifficulty : undefined,
+      difficulties: this.difficulty === undefined ? wordPool.difficulties : undefined,
       excludeWordIds: requestedExclusions,
       randomValue: this.random(),
     } as const;

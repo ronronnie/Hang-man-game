@@ -11,7 +11,7 @@ const words = [
     answer: "THE DARK KNIGHT",
     displayAnswer: "The Dark Knight",
     genre: "movies",
-    difficulty: 2,
+    difficulty: "easy",
     hint: "A caped crusader",
   },
   {
@@ -19,14 +19,14 @@ const words = [
     answer: "GRAND THEFT AUTO",
     displayAnswer: "Grand Theft Auto",
     genre: "video-games",
-    difficulty: 2,
+    difficulty: "medium",
   },
   {
     id: "manchester-united",
     answer: "MANCHESTER UNITED",
     displayAnswer: "Manchester United",
     genre: "sports",
-    difficulty: 3,
+    difficulty: "hard",
   },
 ] as const satisfies readonly WordEntry[];
 
@@ -55,10 +55,10 @@ describe("answer utilities", () => {
 
 describe("word selection", () => {
   it("selects deterministically from the supplied pool by difficulty", () => {
-    expect(selectWord(words, { difficulty: 3, randomValue: 0 })?.id).toBe(
+    expect(selectWord(words, { difficulty: "hard", randomValue: 0 })?.id).toBe(
       "manchester-united",
     );
-    expect(selectWord(words, { difficulty: 5, randomValue: 0 })).toBeNull();
+    expect(selectWord(words, { difficulty: "brutal", randomValue: 0 })).toBeNull();
   });
 
   it("supports exclusions without knowing category selection", () => {
@@ -116,7 +116,7 @@ describe("HangmanGameEngine", () => {
           answer: "A A",
           displayAnswer: "A-A",
           genre: "general-knowledge",
-          difficulty: 1,
+          difficulty: "easy",
         },
       ],
     });
@@ -135,7 +135,7 @@ describe("HangmanGameEngine", () => {
           answer: "A_B",
           displayAnswer: "A_B",
           genre: "general-knowledge",
-          difficulty: 1,
+          difficulty: "easy",
         },
       ],
     });
@@ -166,7 +166,7 @@ describe("HangmanGameEngine", () => {
   });
 
   it("charges one attempt for an incorrect full-word solve", () => {
-    const engine = createTestEngine({ words: [words[2]] });
+    const engine = createTestEngine({ words: [words[2]], difficulty: "hard" });
     const result = engine.solveWord("Manchester City");
 
     expect(result.outcome).toBe("incorrect");
@@ -183,7 +183,7 @@ describe("HangmanGameEngine", () => {
           answer: "INCEPTION",
           displayAnswer: "Inception",
           genre: "movies",
-          difficulty: 4,
+          difficulty: "hard",
         },
       ],
     });
@@ -211,7 +211,7 @@ describe("HangmanGameEngine", () => {
           answer: "INCEPTION",
           displayAnswer: "Inception",
           genre: "movies",
-          difficulty: 4,
+          difficulty: "hard",
         },
       ],
     });
@@ -230,7 +230,7 @@ describe("HangmanGameEngine", () => {
           answer: "INTERSTELLAR",
           displayAnswer: "Interstellar",
           genre: "movies",
-          difficulty: 5,
+          difficulty: "brutal",
         },
       ],
     });
@@ -257,7 +257,7 @@ describe("HangmanGameEngine", () => {
           answer: "INTERSTELLAR",
           displayAnswer: "Interstellar",
           genre: "movies",
-          difficulty: 5,
+          difficulty: "brutal",
         },
       ],
     });
@@ -277,7 +277,7 @@ describe("HangmanGameEngine", () => {
           answer: "INCEPTION",
           displayAnswer: "Inception",
           genre: "movies",
-          difficulty: 4,
+          difficulty: "hard",
         },
       ],
     });

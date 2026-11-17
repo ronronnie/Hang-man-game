@@ -1,0 +1,9 @@
+export { BOOK_WORDS } from "./books";
+export { GENERAL_KNOWLEDGE_WORDS } from "./general-knowledge";
+export { GEOGRAPHY_WORDS } from "./geography";
+export { MOVIE_WORDS } from "./movies";
+export { MUSIC_WORDS } from "./music";
+export { SCIENCE_WORDS } from "./science";
+export { SPORTS_WORDS } from "./sports";
+export { TV_SHOW_WORDS } from "./tv-shows";
+export { VIDEO_GAME_WORDS } from "./video-games";

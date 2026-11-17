@@ -3,8 +3,7 @@ import { validateWordEntry } from "./answer";
 
 export interface SelectWordOptions {
   difficulty?: WordDifficulty;
-  minimumDifficulty?: WordDifficulty;
-  maximumDifficulty?: WordDifficulty;
+  difficulties?: readonly WordDifficulty[];
   excludeWordIds?: readonly WordId[];
   randomValue?: number;
 }
@@ -13,8 +12,7 @@ export function selectWord(
   words: readonly WordEntry[],
   {
     difficulty,
-    minimumDifficulty,
-    maximumDifficulty,
+    difficulties,
     excludeWordIds = [],
     randomValue = Math.random(),
   }: SelectWordOptions,
@@ -29,8 +27,7 @@ export function selectWord(
     return (
       !excluded.has(word.id) &&
       (difficulty === undefined || word.difficulty === difficulty) &&
-      (minimumDifficulty === undefined || word.difficulty >= minimumDifficulty) &&
-      (maximumDifficulty === undefined || word.difficulty <= maximumDifficulty)
+      (difficulties === undefined || difficulties.includes(word.difficulty))
     );
   });
 

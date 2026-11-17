@@ -16,21 +16,21 @@ const words = [
     answer: "THE DARK KNIGHT",
     displayAnswer: "The Dark Knight",
     genre: "movies",
-    difficulty: 2,
+    difficulty: "easy",
   },
   {
     id: "game",
     answer: "GRAND THEFT AUTO",
     displayAnswer: "Grand Theft Auto",
     genre: "video-games",
-    difficulty: 2,
+    difficulty: "medium",
   },
   {
     id: "team",
     answer: "MANCHESTER UNITED",
     displayAnswer: "Manchester United",
     genre: "sports",
-    difficulty: 3,
+    difficulty: "hard",
   },
 ] as const satisfies readonly WordEntry[];
 
@@ -78,7 +78,7 @@ describe("category word pools", () => {
     const pool = createCategoryWordPool(words, "surprise-me");
     expect(pool.map((word) => word.id)).toEqual(["movie", "game", "team"]);
 
-    const engine = createGameEngine({ words: pool, random: () => 0.99 });
+    const engine = createGameEngine({ words: pool, mode: "ultra", random: () => 0.99 });
     expect(engine.getState().word.id).toBe("team");
   });
 

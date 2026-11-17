@@ -10,7 +10,8 @@
     "./engine": "./src/engine/index.ts",
     "./modifiers": "./src/modifiers/index.ts",
     "./types": "./src/types/index.ts",
-    "./validation": "./src/validation/index.ts"
+    "./validation": "./src/validation/index.ts",
+    "./words": "./src/words/word-catalog.ts"
   },
   "scripts": {
     "test": "vitest run",

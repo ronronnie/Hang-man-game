@@ -41,3 +41,9 @@ Mode balancing is centralized in `packages/game-core/src/config/modes.ts`. The e
 Category metadata is centralized in `packages/game-core/src/config/categories.ts`. Definitions use semantic icon and artwork identifiers instead of React components or browser assets, keeping them reusable by the future mobile client.
 
 `packages/game-core/src/categories` translates a category choice into a word pool. Direct categories filter to their own entries; Surprise Me combines entries from every enabled direct category. Client orchestration passes that resulting pool to the engine. The engine never branches on a category or contains Surprise Me behavior, and `GameState.genre` records only the concrete category of the selected word.
+
+## Local content
+
+The initial test content lives under `packages/game-core/src/words/data`, split into one module per category. A small `defineWords` factory adds the concrete category and shared metadata while still producing ordinary `WordEntry` objects. The aggregate catalog exports all entries or a category-indexed view, allowing both web and future mobile clients to use the same local content without importing client code.
+
+Difficulty is a domain label rather than a numeric implementation detail: `easy`, `medium`, `hard`, or `brutal`. Mode configuration declares the eligible labels, and the engine applies those rules to whichever category pool the client supplies.
