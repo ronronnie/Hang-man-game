@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { GameSetupScreen } from "@/screens/game-setup-screen";
+import { ModeSelectionScreen } from "@/screens/mode-selection-screen";
 
-export const metadata: Metadata = { title: "Choose a game" };
+export const metadata: Metadata = { title: "Select Mode" };
 
 export default function PlayPage() {
-  return <GameSetupScreen />;
+  return <ModeSelectionScreen />;
 }

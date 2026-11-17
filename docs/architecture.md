@@ -47,3 +47,9 @@ Category metadata is centralized in `packages/game-core/src/config/categories.ts
 The initial test content lives under `packages/game-core/src/words/data`, split into one module per category. A small `defineWords` factory adds the concrete category and shared metadata while still producing ordinary `WordEntry` objects. The aggregate catalog exports all entries or a category-indexed view, allowing both web and future mobile clients to use the same local content without importing client code.
 
 Difficulty is a domain label rather than a numeric implementation detail: `easy`, `medium`, `hard`, or `brutal`. Mode configuration declares the eligible labels, and the engine applies those rules to whichever category pool the client supplies.
+
+## Web game flow
+
+The web client uses a focused route sequence: `/` → `/play` → `/play/[mode]` → `/play/[mode]/[genre]` → `/results`. The screens contain no persistent dashboard navigation. Next.js templates wrap route segments with reusable Framer Motion transitions, while links are prefetched for quick movement through the two selection steps.
+
+The dynamic game route resolves the chosen category into a word pool, applies the mode's difficulty tiers, and passes one `WordEntry` into the platform-independent engine. The client game screen translates keyboard, button, timer, and solve-form input into engine calls; it owns rendering, haptics, analytics, and result navigation rather than adding those concerns to `game-core`.

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { AppShell } from "@/components/layout/app-shell";
+import { GameShell } from "@/components/layout/game-shell";
 import { PlatformProvider } from "@/platform/platform-provider";
 
 import "./globals.css";
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     default: "Hangman",
     template: "%s · Hangman",
   },
-  description: "A modern word-guessing game built for web and mobile.",
+  description: "Classic Hangman pushed to the limit with timers, modifiers, and brutal modes.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en">
       <body>
         <PlatformProvider>
-          <AppShell>{children}</AppShell>
+          <GameShell>{children}</GameShell>
         </PlatformProvider>
       </body>
     </html>
