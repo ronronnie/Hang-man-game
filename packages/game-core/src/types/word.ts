@@ -1,4 +1,5 @@
 import type { PlayableCategoryId } from "./category";
+import type { ContentRegion } from "./region";
 
 export type WordId = string;
 export const WORD_DIFFICULTIES = ["easy", "medium", "hard", "brutal"] as const;
@@ -13,6 +14,8 @@ export interface WordEntry {
   /** Presentation-safe answer, preserving capitalization and punctuation. */
   displayAnswer: string;
   genre: PlayableCategoryId;
+  /** Legacy entries without a region are migrated as global at content boundaries. */
+  region?: ContentRegion;
   difficulty: WordDifficulty;
   hint?: string;
   alternateAnswers?: readonly string[];

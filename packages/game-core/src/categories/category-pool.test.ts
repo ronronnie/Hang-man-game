@@ -16,6 +16,7 @@ const words = [
     answer: "THE DARK KNIGHT",
     displayAnswer: "The Dark Knight",
     genre: "movies",
+    region: "global",
     difficulty: "easy",
   },
   {
@@ -23,6 +24,7 @@ const words = [
     answer: "GRAND THEFT AUTO",
     displayAnswer: "Grand Theft Auto",
     genre: "video-games",
+    region: "usa",
     difficulty: "medium",
   },
   {
@@ -30,6 +32,7 @@ const words = [
     answer: "MANCHESTER UNITED",
     displayAnswer: "Manchester United",
     genre: "sports",
+    region: "india",
     difficulty: "hard",
   },
 ] as const satisfies readonly WordEntry[];

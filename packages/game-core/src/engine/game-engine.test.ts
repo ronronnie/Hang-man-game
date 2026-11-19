@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import type { GameState } from "../types/game-state";
 import type { WordEntry } from "../types/word";
-import { maskAnswer, normalizeAnswer } from "./answer";
+import {
+  getForgottenIncorrectLetters,
+  getSecondaryWord,
+  getVisibleAnswers,
+  getVisibleIncorrectLetters,
+} from "../modifiers/runtime";
+import { countOccurrences, maskAnswer, normalizeAnswer } from "./answer";
 import { createGameEngine } from "./game-engine";
 import { selectWord } from "./word-selection";
 
@@ -50,6 +57,11 @@ describe("answer utilities", () => {
 
   it("normalizes phrases without requiring punctuation", () => {
     expect(normalizeAnswer("  grand-theft auto! ")).toBe("GRANDTHEFTAUTO");
+  });
+
+  it("reveals apostrophes and every repeated occurrence without charging for punctuation", () => {
+    expect(maskAnswer("Ocean's Eleven", ["o"])).toBe("O____'_ ______");
+    expect(countOccurrences("Mississippi", "s")).toBe(4);
   });
 });
 
@@ -174,6 +186,140 @@ describe("HangmanGameEngine", () => {
     expect(result.state.remainingAttempts).toBe(6);
   });
 
+  it("reveals a free text hint once in the classic mode", () => {
+    const engine = createTestEngine();
+    const hint = engine.useHint();
+
+    expect(hint.outcome).toBe("revealed");
+    expect(hint.text).toBe("A caped crusader");
+    expect(hint.hintKind).toBe("text-clue");
+    expect(hint.cost).toEqual({ type: "none" });
+    expect(hint.state.hints.remaining).toBe(0);
+    expect(hint.state.score.hintPenalty).toBe(0);
+    expect(engine.useHint().outcome).toBe("unavailable");
+  });
+
+  it("can spend the classic free hint to reveal one letter", () => {
+    const engine = createTestEngine();
+    const hint = engine.useHint("reveal-letter");
+
+    expect(hint.outcome).toBe("revealed");
+    expect(hint.revealedLetter).toBe("T");
+    expect(hint.state.guessedLetters).toEqual(["T"]);
+    expect(hint.state.maskedAnswer).toBe("T__ ____ _____t");
+    expect(hint.state.hints.remaining).toBe(0);
+    expect(engine.getAvailableHints()).toEqual([]);
+  });
+
+  it("applies the configured score cost for an Ultra hint", () => {
+    const engine = createTestEngine({
+      mode: "ultra",
+      words: [
+        {
+          id: "hard-movie-hint",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: "hard",
+          hint: "A dream within a dream",
+        },
+      ],
+    });
+
+    const guess = engine.guessLetter("i");
+    const hint = engine.useHint();
+
+    expect(guess.state.score.total).toBeGreaterThan(0);
+    expect(hint.cost).toEqual({ type: "score-percent", percent: 10 });
+    expect(hint.state.score.hintPenaltyPercent).toBe(10);
+    expect(hint.state.score.hintPenalty).toBeGreaterThan(0);
+    expect(hint.state.score.total).toBeLessThan(guess.state.score.total);
+  });
+
+  it("charges Ultra twenty percent for a revealed letter", () => {
+    const engine = createTestEngine({
+      mode: "ultra",
+      words: [
+        {
+          id: "hard-movie-reveal",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: "hard",
+          hint: "A dream within a dream",
+        },
+      ],
+    });
+
+    const hint = engine.useHint("reveal-letter");
+
+    expect(hint.revealedLetter).toBe("I");
+    expect(hint.cost).toEqual({ type: "score-percent", percent: 20 });
+    engine.guessLetter("n");
+    expect(engine.getState().score.hintPenaltyPercent).toBe(20);
+    expect(engine.getState().score.hintPenalty).toBeGreaterThan(0);
+  });
+
+  it("applies each explicit Ultra Max hint sacrifice", () => {
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      words: [
+        {
+          id: "brutal-movie-hints",
+          answer: "INTERSTELLAR",
+          displayAnswer: "Interstellar",
+          genre: "movies",
+          difficulty: "brutal",
+          hint: "A journey beyond the solar system",
+        },
+      ],
+    });
+    engine.beginRound();
+
+    const category = engine.useHint("show-category");
+    expect(category.cost).toEqual({ type: "time", seconds: 15 });
+    expect(category.state.timer?.remainingSeconds).toBe(30);
+
+    const clue = engine.useHint("text-clue");
+    expect(clue.cost).toEqual({ type: "time", seconds: 10 });
+    expect(clue.state.timer?.remainingSeconds).toBe(20);
+
+    const reveal = engine.useHint("reveal-letter");
+    expect(reveal.cost).toEqual({ type: "attempt", attempts: 1 });
+    expect(reveal.state.remainingAttempts).toBe(3);
+    expect(engine.getAvailableHints()).toEqual([]);
+  });
+
+  it("ends an Ultra Max round when a reveal-letter hint spends the final life", () => {
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      maximumAttempts: 1,
+      random: () => 0.21,
+      words: [
+        {
+          id: "hard-movie-last-life",
+          answer: "INTERSTELLAR",
+          displayAnswer: "Interstellar",
+          genre: "movies",
+          difficulty: "brutal",
+          hint: "A journey beyond the solar system",
+        },
+      ],
+    });
+    engine.beginRound();
+
+    const hint = engine.useHint("reveal-letter");
+
+    expect(hint.outcome).toBe("revealed");
+    expect(hint.state.remainingAttempts).toBe(0);
+    expect(hint.state.status).toBe("lost");
+    expect(hint.events).toContainEqual({
+      type: "STATUS_CHANGED",
+      from: "playing",
+      to: "lost",
+    });
+  });
+
   it("applies Ultra attempts, timer penalties, and time progression", () => {
     const engine = createTestEngine({
       mode: "ultra",
@@ -199,6 +345,53 @@ describe("HangmanGameEngine", () => {
     const time = engine.advanceTime(10);
     expect(time.consumedSeconds).toBe(10);
     expect(time.state.timer?.remainingSeconds).toBe(45);
+  });
+
+  it("builds Ultra combos, accrues combo score, and resets on an incorrect guess", () => {
+    const engine = createTestEngine({
+      mode: "ultra",
+      words: [
+        {
+          id: "ultra-combo-movie",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: "hard",
+        },
+      ],
+    });
+
+    const first = engine.guessLetter("i");
+    const second = engine.guessLetter("n");
+    const third = engine.guessLetter("c");
+
+    expect(first.state.streak).toMatchObject({ current: 1, best: 1 });
+    expect(first.state.score.total).toBeGreaterThan(0);
+    expect(second.state.streak).toMatchObject({ current: 2, best: 2 });
+    expect(second.state.score.comboMultiplier).toBe(1.2);
+    expect(second.state.score.total).toBeGreaterThan(first.state.score.total);
+    expect(second.events).toContainEqual({
+      type: "COMBO_CHANGED",
+      from: 1,
+      to: 2,
+      multiplier: 1.2,
+    });
+    expect(third.state.streak).toMatchObject({ current: 3, best: 3 });
+    expect(third.state.score.comboMultiplier).toBe(1.5);
+
+    const incorrect = engine.guessLetter("z");
+    expect(incorrect.state.streak).toMatchObject({ current: 0, best: 3 });
+    expect(incorrect.state.score.comboMultiplier).toBe(1.5);
+    expect(incorrect.events).toContainEqual({
+      type: "COMBO_CHANGED",
+      from: 3,
+      to: 0,
+      multiplier: 1,
+    });
+
+    const nextCorrect = engine.guessLetter("e");
+    expect(nextCorrect.state.streak).toMatchObject({ current: 1, best: 3 });
+    expect(nextCorrect.state.score.comboMultiplier).toBe(1.5);
   });
 
   it("uses the harder word pool for Ultra", () => {
@@ -237,13 +430,21 @@ describe("HangmanGameEngine", () => {
 
     const state = engine.getState();
     expect(state.maximumAttempts).toBe(4);
+    expect(state.status).toBe("ready");
     expect(state.modifiers).toHaveLength(1);
     expect(state.modifiers[0]?.id).toBe("time-attack");
-    expect(state.timer?.rateMultiplier).toBe(1.5);
+    expect(state.timer?.rateMultiplier).toBe(1);
 
-    const result = engine.advanceTime(10);
-    expect(result.consumedSeconds).toBe(15);
-    expect(result.state.timer?.remainingSeconds).toBe(30);
+    expect(engine.advanceTime(10).consumedSeconds).toBe(0);
+    engine.beginRound();
+    const normalTime = engine.advanceTime(30);
+    expect(normalTime.consumedSeconds).toBe(30);
+    expect(normalTime.state.timer?.remainingSeconds).toBe(15);
+    expect(normalTime.state.timer?.rateMultiplier).toBe(1.5);
+
+    const acceleratedTime = engine.advanceTime(4);
+    expect(acceleratedTime.consumedSeconds).toBe(6);
+    expect(acceleratedTime.state.timer?.remainingSeconds).toBe(9);
   });
 
   it("keeps a modifier on reset and selects one modifier again for a new round", () => {
@@ -259,6 +460,13 @@ describe("HangmanGameEngine", () => {
           genre: "movies",
           difficulty: "brutal",
         },
+        {
+          id: "second-hardest-movie",
+          answer: "THE PRESTIGE",
+          displayAnswer: "The Prestige",
+          genre: "movies",
+          difficulty: "brutal",
+        },
       ],
     });
 
@@ -266,6 +474,8 @@ describe("HangmanGameEngine", () => {
     expect(engine.resetRound().modifiers[0]?.id).toBe("memory");
     expect(engine.startNewRound().modifiers).toHaveLength(1);
     expect(engine.getState().modifiers[0]?.id).toBe("double-trouble");
+    expect(engine.getState().timer?.durationSeconds).toBe(75);
+    expect(engine.getState().modifierState?.id).toBe("double-trouble");
   });
 
   it("loses a timed round when the timer reaches zero", () => {
@@ -285,7 +495,47 @@ describe("HangmanGameEngine", () => {
     const result = engine.advanceTime(60);
     expect(result.state.status).toBe("lost");
     expect(result.state.timer?.remainingSeconds).toBe(0);
+    expect(result.events.filter((event) => event.type === "STATUS_CHANGED")).toHaveLength(1);
     expect(engine.guessLetter("i").outcome).toBe("round-complete");
+  });
+
+  it("restores an active round without trusting stale calculated fields", () => {
+    const original = createTestEngine({
+      mode: "ultra",
+      words: [
+        {
+          id: "restorable-movie",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: "hard",
+        },
+      ],
+    });
+    original.guessLetter("i");
+    original.guessLetter("z");
+    original.advanceTime(9);
+    const serialized = JSON.parse(JSON.stringify(original.getState())) as GameState;
+    const restoredEngine = createTestEngine({
+      mode: "ultra",
+      words: [
+        {
+          id: "restorable-movie",
+          answer: "INCEPTION",
+          displayAnswer: "Inception",
+          genre: "movies",
+          difficulty: "hard",
+        },
+      ],
+    });
+
+    const restored = restoredEngine.restoreRound({ ...serialized, maskedAnswer: "tampered" });
+
+    expect(restored.maskedAnswer).toBe("I_____i__");
+    expect(restored.incorrectLetters).toEqual(["Z"]);
+    expect(restored.remainingAttempts).toBe(4);
+    expect(restored.timer?.remainingSeconds).toBe(46);
+    expect(restoredEngine.guessLetter("n").outcome).toBe("correct");
   });
 
   it("resets the same round and starts a new round with another word", () => {
@@ -303,5 +553,104 @@ describe("HangmanGameEngine", () => {
     expect(next.roundNumber).toBe(2);
     expect(next.roundId).toBe("round-2");
     expect(next.word.id).not.toBe(first.word.id);
+  });
+});
+
+describe("Ultra Max modifier runtime", () => {
+  const connectedWords = [
+    {
+      id: "connected-alpha",
+      answer: "ALPHA",
+      displayAnswer: "Alpha",
+      genre: "general-knowledge",
+      difficulty: "hard",
+      metadata: { connectionId: "greek" },
+    },
+    {
+      id: "connected-omega",
+      answer: "OMEGA",
+      displayAnswer: "Omega",
+      genre: "general-knowledge",
+      difficulty: "brutal",
+      metadata: { connectionId: "greek" },
+    },
+  ] as const satisfies readonly WordEntry[];
+
+  it("hides Memory letters after four seconds without forgetting solved letters", () => {
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      words: connectedWords,
+      initialWordId: "connected-alpha",
+      random: () => 0,
+    });
+    engine.beginRound();
+
+    const guess = engine.guessLetter("a");
+    expect(getVisibleAnswers(guess.state).primary).toBe("A___a");
+    expect(engine.advanceTime(3.9).state.maskedAnswer).toBe("A___a");
+
+    const expired = engine.advanceTime(0.2).state;
+    expect(getVisibleAnswers(expired).primary).toBe("_____");
+    expect(expired.maskedAnswer).toBe("A___a");
+    expect(expired.guessedLetters).toContain("A");
+    engine.guessLetter("l");
+    engine.guessLetter("p");
+    const allLettersFound = engine.guessLetter("h");
+    expect(allLettersFound.state.maskedAnswer).toBe("Alpha");
+    expect(allLettersFound.state.status).toBe("playing");
+    expect(engine.solveWord("alpha").state.status).toBe("won");
+  });
+
+  it("keeps Hidden Length ambiguous until the first correct guess", () => {
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      words: connectedWords,
+      initialWordId: "connected-alpha",
+      random: () => 0.21,
+    });
+    expect(getVisibleAnswers(engine.getState()).primary).toBe("???????????");
+    engine.beginRound();
+    expect(getVisibleAnswers(engine.guessLetter("z").state).primary).toBe("???????????");
+    expect(getVisibleAnswers(engine.guessLetter("a").state).primary).toBe("A___a");
+  });
+
+  it("visually forgets Keyboard Amnesia mistakes while retaining validation", () => {
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      words: connectedWords,
+      initialWordId: "connected-alpha",
+      random: () => 0.41,
+    });
+    engine.beginRound();
+    const mistake = engine.guessLetter("z").state;
+    expect(getVisibleIncorrectLetters(mistake)).toEqual(["Z"]);
+
+    const forgotten = engine.advanceTime(3.1).state;
+    expect(getVisibleIncorrectLetters(forgotten)).toEqual([]);
+    expect(getForgottenIncorrectLetters(forgotten)).toEqual(["Z"]);
+    expect(engine.guessLetter("z").outcome).toBe("already-guessed");
+  });
+
+  it("requires both connected Double Trouble answers and adds thirty seconds", () => {
+    const randomValues = [0.81, 0];
+    const engine = createTestEngine({
+      mode: "ultra-max",
+      words: connectedWords,
+      initialWordId: "connected-alpha",
+      random: () => randomValues.shift() ?? 0,
+    });
+    expect(engine.getState().timer?.durationSeconds).toBe(75);
+    expect(getSecondaryWord(engine.getState())?.id).toBe("connected-omega");
+    engine.beginRound();
+
+    const first = engine.solveWord("alpha");
+    expect(first.state.status).toBe("playing");
+    expect(first.state.modifierState).toMatchObject({
+      id: "double-trouble",
+      solvedWordIds: ["connected-alpha"],
+    });
+
+    const second = engine.solveWord("omega");
+    expect(second.state.status).toBe("won");
   });
 });

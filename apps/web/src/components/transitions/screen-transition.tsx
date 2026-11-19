@@ -8,6 +8,7 @@ import { quickTransition, screenEntrance, transitionItem } from "@/animations/tr
 interface TransitionProps {
   children: ReactNode;
   className?: string;
+  delay?: number;
 }
 
 export function ScreenTransition({ children, className }: TransitionProps) {
@@ -25,7 +26,7 @@ export function ScreenTransition({ children, className }: TransitionProps) {
   );
 }
 
-export function TransitionItem({ children, className }: TransitionProps) {
+export function TransitionItem({ children, className, delay = 0 }: TransitionProps) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -33,7 +34,7 @@ export function TransitionItem({ children, className }: TransitionProps) {
       animate="visible"
       className={className}
       initial={reduceMotion ? false : "hidden"}
-      transition={quickTransition}
+      transition={{ ...quickTransition, delay }}
       variants={transitionItem}
     >
       {children}

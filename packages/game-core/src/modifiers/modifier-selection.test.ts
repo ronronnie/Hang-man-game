@@ -14,12 +14,15 @@ describe("Ultra Max modifier registry", () => {
       "double-trouble",
     ]);
     expect(MODIFIERS_BY_ID.memory.config.revealedLetterVisibleSeconds).toBe(4);
-    expect(MODIFIERS_BY_ID["hidden-length"].config.revealAfterFirstGuess).toBe(true);
-    expect(MODIFIERS_BY_ID["keyboard-amnesia"].config.incorrectKeyUnavailableSeconds).toBe(8);
+    expect(MODIFIERS_BY_ID["hidden-length"].config.revealAfterFirstCorrectGuess).toBe(true);
+    expect(MODIFIERS_BY_ID["hidden-length"].config.placeholderLength).toBe(11);
+    expect(MODIFIERS_BY_ID["keyboard-amnesia"].config.incorrectKeyUnavailableSeconds).toBe(3);
     expect(MODIFIERS_BY_ID["time-attack"].config.timerRateMultiplier).toBe(1.5);
+    expect(MODIFIERS_BY_ID["time-attack"].config.acceleratedFinalSeconds).toBe(15);
     expect(MODIFIERS_BY_ID["double-trouble"].config).toMatchObject({
       answerCount: 2,
       connectionMetadataKey: "connectionId",
+      timerBonusSeconds: 30,
     });
   });
 

@@ -1,8 +1,8 @@
 import type { PlayableCategoryId } from "./category";
 import type { HintState } from "./hint";
 import type { GameMode } from "./mode";
-import type { ActiveModifier } from "./modifier";
-import type { ScoreBreakdown, StreakState } from "./scoring";
+import type { ActiveModifier, ModifierRuntimeState } from "./modifier";
+import type { RoundMetrics, ScoreBreakdown, StreakState } from "./scoring";
 import type { GameTimerState } from "./timer";
 import type { WordEntry } from "./word";
 
@@ -27,6 +27,8 @@ export interface GameState {
   turn: number;
   hints: HintState;
   modifiers: readonly ActiveModifier[];
+  modifierState: Readonly<ModifierRuntimeState> | null;
+  metrics: RoundMetrics;
   score: ScoreBreakdown;
   streak: StreakState;
   startedAt: string;
@@ -60,6 +62,7 @@ export type GameEvent =
   | { type: "TIME_ADVANCED"; elapsedRealSeconds: number; consumedSeconds: number }
   | { type: "TIME_PENALTY_APPLIED"; seconds: number }
   | { type: "MODIFIER_ACTIVATED"; modifierId: ActiveModifier["id"] }
-  | { type: "HINT_USED"; hintId: string }
+  | { type: "HINT_USED"; hintId: string; hintKind: import("./hint").HintKind }
+  | { type: "COMBO_CHANGED"; from: number; to: number; multiplier: number }
   | { type: "STATUS_CHANGED"; from: GameStatus; to: GameStatus }
   | { type: "SCORE_CHANGED"; difference: number };

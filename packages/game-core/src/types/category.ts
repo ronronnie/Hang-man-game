@@ -11,6 +11,11 @@ export const CATEGORY_IDS = [
   "surprise-me",
 ] as const;
 
+export const PLAYABLE_CATEGORY_IDS = CATEGORY_IDS.filter(
+  (categoryId): categoryId is Exclude<(typeof CATEGORY_IDS)[number], "surprise-me"> =>
+    categoryId !== "surprise-me",
+);
+
 export type CategoryId = (typeof CATEGORY_IDS)[number];
 export type PlayableCategoryId = Exclude<CategoryId, "surprise-me">;
 export type Category = CategoryId;

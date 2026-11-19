@@ -1,44 +1,27 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { connection } from "next/server";
-import { randomInt } from "node:crypto";
+import { notFound, redirect } from "next/navigation";
 
-import {
-  GAME_MODES_BY_ID,
-  LOCAL_WORD_DATASET,
-  createCategoryWordPool,
-  isCategoryId,
-  isGameModeId,
-  selectWord,
-} from "@hangman/game-core";
+import { isCategoryId, isGameModeId, isRegionPreference } from "@hangman/game-core";
 
-import { GameScreen } from "@/screens/game-screen";
+import { CategorySelectionScreen } from "@/screens/category-selection-screen";
 
-interface GamePageProps {
+interface RegionPageProps {
   params: Promise<{ mode: string; genre: string }>;
-  searchParams: Promise<{ exclude?: string | string[] }>;
 }
 
-export const metadata: Metadata = { title: "Game" };
+export const metadata: Metadata = { title: "Select Category" };
 
-export default async function GamePage({ params, searchParams }: GamePageProps) {
-  const { mode, genre } = await params;
+export default async function RegionPage({ params }: RegionPageProps) {
+  const { mode, genre: regionOrLegacyGenre } = await params;
+  if (!isGameModeId(mode)) notFound();
 
-  if (!isGameModeId(mode) || !isCategoryId(genre)) {
-    notFound();
+  if (isRegionPreference(regionOrLegacyGenre)) {
+    return <CategorySelectionScreen modeId={mode} regionPreference={regionOrLegacyGenre} />;
   }
 
-  await connection();
-  const { exclude } = await searchParams;
-  const excludedWordIds = typeof exclude === "string" ? [exclude] : (exclude ?? []);
-  const categoryPool = createCategoryWordPool(LOCAL_WORD_DATASET, genre);
-  const word = selectWord(categoryPool, {
-    difficulties: GAME_MODES_BY_ID[mode].rules.wordPool.difficulties,
-    excludeWordIds: excludedWordIds,
-    randomValue: randomInt(1_000_000) / 1_000_000,
-  });
+  if (isCategoryId(regionOrLegacyGenre)) {
+    redirect(`/play/${mode}/mixed/${regionOrLegacyGenre}`);
+  }
 
-  if (!word) notFound();
-
-  return <GameScreen modeId={mode} selectedCategoryId={genre} word={word} />;
+  notFound();
 }

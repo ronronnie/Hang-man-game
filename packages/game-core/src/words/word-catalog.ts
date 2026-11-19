@@ -10,23 +10,34 @@ import {
   SPORTS_WORDS,
   TV_SHOW_WORDS,
   VIDEO_GAME_WORDS,
+  INDIA_BOOK_WORDS,
+  INDIA_GENERAL_KNOWLEDGE_WORDS,
+  INDIA_GEOGRAPHY_WORDS,
+  INDIA_MOVIE_WORDS,
+  INDIA_MUSIC_WORDS,
+  INDIA_SCIENCE_WORDS,
+  INDIA_SPORTS_WORDS,
+  INDIA_TV_SHOW_WORDS,
+  INDIA_VIDEO_GAME_WORDS,
 } from "./data/index";
 
 export type { WordDifficulty, WordEntry, WordQuery, WordRepository } from "../types/word";
+export * from "./region-filter";
+export * from "./content-report";
 export * from "./data/index";
 
 export const LOCAL_WORDS_BY_GENRE: Readonly<
   Record<PlayableCategoryId, readonly WordEntry[]>
 > = Object.freeze({
-  movies: MOVIE_WORDS,
-  "tv-shows": TV_SHOW_WORDS,
-  music: MUSIC_WORDS,
-  "video-games": VIDEO_GAME_WORDS,
-  sports: SPORTS_WORDS,
-  geography: GEOGRAPHY_WORDS,
-  science: SCIENCE_WORDS,
-  books: BOOK_WORDS,
-  "general-knowledge": GENERAL_KNOWLEDGE_WORDS,
+  movies: Object.freeze([...MOVIE_WORDS, ...INDIA_MOVIE_WORDS]),
+  "tv-shows": Object.freeze([...TV_SHOW_WORDS, ...INDIA_TV_SHOW_WORDS]),
+  music: Object.freeze([...MUSIC_WORDS, ...INDIA_MUSIC_WORDS]),
+  "video-games": Object.freeze([...VIDEO_GAME_WORDS, ...INDIA_VIDEO_GAME_WORDS]),
+  sports: Object.freeze([...SPORTS_WORDS, ...INDIA_SPORTS_WORDS]),
+  geography: Object.freeze([...GEOGRAPHY_WORDS, ...INDIA_GEOGRAPHY_WORDS]),
+  science: Object.freeze([...SCIENCE_WORDS, ...INDIA_SCIENCE_WORDS]),
+  books: Object.freeze([...BOOK_WORDS, ...INDIA_BOOK_WORDS]),
+  "general-knowledge": Object.freeze([...GENERAL_KNOWLEDGE_WORDS, ...INDIA_GENERAL_KNOWLEDGE_WORDS]),
 });
 
 export const LOCAL_WORD_DATASET: readonly WordEntry[] = Object.freeze([
@@ -39,4 +50,13 @@ export const LOCAL_WORD_DATASET: readonly WordEntry[] = Object.freeze([
   ...SCIENCE_WORDS,
   ...BOOK_WORDS,
   ...GENERAL_KNOWLEDGE_WORDS,
+  ...INDIA_MOVIE_WORDS,
+  ...INDIA_TV_SHOW_WORDS,
+  ...INDIA_MUSIC_WORDS,
+  ...INDIA_VIDEO_GAME_WORDS,
+  ...INDIA_SPORTS_WORDS,
+  ...INDIA_GEOGRAPHY_WORDS,
+  ...INDIA_SCIENCE_WORDS,
+  ...INDIA_BOOK_WORDS,
+  ...INDIA_GENERAL_KNOWLEDGE_WORDS,
 ]);

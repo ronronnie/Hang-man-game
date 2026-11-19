@@ -1,4 +1,5 @@
 import type { ModifierDefinitionFor, TimeAttackModifierConfig } from "../../types/modifier";
+import { GAME_COPY } from "../../config/copy";
 
 export function createTimeAttackModifier(
   config: Partial<TimeAttackModifierConfig> = {},
@@ -6,12 +7,16 @@ export function createTimeAttackModifier(
 ): ModifierDefinitionFor<"time-attack"> {
   return Object.freeze({
     id: "time-attack",
-    label: "Time Attack",
-    description: "The round timer decreases faster than real time.",
+    label: GAME_COPY.modifiers["time-attack"].label,
+    description: GAME_COPY.modifiers["time-attack"].description,
     compatibleModes: ["ultra-max"] as const,
     enabled: options.enabled ?? true,
     selectionWeight: options.selectionWeight ?? 1,
-    config: Object.freeze({ timerRateMultiplier: 1.5, ...config }),
+    config: Object.freeze({
+      timerRateMultiplier: 1.5,
+      acceleratedFinalSeconds: 15,
+      ...config,
+    }),
   });
 }
 

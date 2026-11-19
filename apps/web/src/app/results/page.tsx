@@ -5,6 +5,8 @@ import {
   LOCAL_WORD_DATASET,
   isCategoryId,
   isGameModeId,
+  isRegionPreference,
+  parseScoreBreakdown,
 } from "@hangman/game-core";
 
 import { ResultsScreen } from "@/screens/results-screen";
@@ -20,16 +22,20 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const outcome = singleValue(query.outcome);
   const mode = singleValue(query.mode);
   const category = singleValue(query.category);
+  const region = singleValue(query.region) || "mixed";
   const wordId = singleValue(query.wordId);
   const attempts = Number(singleValue(query.attempts));
+  const scoreBreakdown = parseScoreBreakdown(singleValue(query.breakdown));
 
   if (
     (outcome !== "won" && outcome !== "lost") ||
     !isGameModeId(mode) ||
     !isCategoryId(category) ||
+    !isRegionPreference(region) ||
     !wordId ||
     !Number.isInteger(attempts) ||
-    attempts < 0
+    attempts < 0 ||
+    !scoreBreakdown
   ) {
     notFound();
   }
@@ -42,7 +48,9 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       categoryId={category}
       modeId={mode}
       outcome={outcome}
+      regionPreference={region}
       remainingAttempts={attempts}
+      score={scoreBreakdown}
       word={word}
     />
   );

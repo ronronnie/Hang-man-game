@@ -7,6 +7,8 @@ export * from "./guess-result";
 export * from "./hint";
 export * from "./mode";
 export * from "./modifier";
+export * from "./region";
 export * from "./scoring";
+export * from "./statistics";
 export * from "./timer";
 export * from "./word";

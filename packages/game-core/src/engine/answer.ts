@@ -1,5 +1,6 @@
 import type { WordEntry } from "../types/word";
 import { WORD_DIFFICULTIES } from "../types/word";
+import { isContentRegion } from "../types/region";
 import { isPlayableCategoryId } from "../validation/identifiers";
 
 const GUESSABLE_CHARACTER = /^[\p{L}\p{N}]$/u;
@@ -68,6 +69,9 @@ export function validateWordEntry(word: WordEntry): void {
   const genre: string = word.genre;
   if (!isPlayableCategoryId(genre)) {
     throw new Error(`WordEntry "${word.id}" has an invalid playable genre`);
+  }
+  if (word.region !== undefined && !isContentRegion(word.region)) {
+    throw new Error(`WordEntry "${word.id}" has an invalid content region`);
   }
   if (!(WORD_DIFFICULTIES as readonly string[]).includes(word.difficulty)) {
     throw new Error(

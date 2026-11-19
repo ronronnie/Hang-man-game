@@ -5,9 +5,12 @@ import type {
   PlayableCategoryId,
 } from "../types/category";
 import type { WordEntry } from "../types/word";
+import type { RegionPreference } from "../types/region";
+import { filterWordsByRegion } from "../words/region-filter";
 
 export interface CreateCategoryWordPoolOptions {
   categories?: readonly CategoryDefinition[];
+  regionPreference?: RegionPreference;
 }
 
 /**
@@ -32,11 +35,12 @@ export function createCategoryWordPool(
       .map((category) => category.id as PlayableCategoryId),
   );
 
-  const pool = words.filter((word) =>
+  const categoryPool = words.filter((word) =>
     selectedCategory.selection === "surprise"
       ? enabledCategoryIds.has(word.genre)
       : word.genre === selectedCategory.id,
   );
+  const pool = filterWordsByRegion(categoryPool, options.regionPreference ?? "mixed");
 
   return Object.freeze([...pool]);
 }

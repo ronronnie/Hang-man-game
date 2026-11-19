@@ -1,22 +1,45 @@
+export const HINT_KINDS = ["text-clue", "reveal-letter", "show-category"] as const;
+
+export type HintKind = (typeof HINT_KINDS)[number];
 export type HintId = string;
 
-export interface HintDefinition {
+export type HintCost =
+  | { type: "none" }
+  | { type: "score-percent"; percent: number }
+  | { type: "time"; seconds: number }
+  | { type: "attempt"; attempts: number };
+
+export type HintCostOption = HintCost["type"];
+
+export interface HintRule {
+  kind: HintKind;
+  label: string;
+  description: string;
+  cost: HintCost;
+  requiresConfirmation: boolean;
+}
+
+/** A round-specific hint option ready to be presented by any client. */
+export interface HintDefinition extends HintRule {
   id: HintId;
-  kind: "text" | "reveal-letter" | "remove-letters";
-  text?: string;
-  cost: number;
+}
+
+export interface AppliedHint {
+  id: HintId;
+  kind: HintKind;
+  cost: HintCost;
+  revealedLetter?: string;
 }
 
 export interface HintState {
   usedHintIds: readonly HintId[];
+  usages: readonly AppliedHint[];
   remaining: number;
 }
 
-export type HintCostOption = "none" | "score" | "time";
-
 export interface HintModeRules {
   enabled: boolean;
+  /** Shared allowance across all configured options. Zero means each option may be used once. */
   freeHints: number;
-  reducesFinalScore: boolean;
-  costOptions: readonly HintCostOption[];
+  options: readonly HintRule[];
 }

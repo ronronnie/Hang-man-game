@@ -5,3 +5,4 @@ export * from "./mechanics/memory";
 export * from "./mechanics/time-attack";
 export * from "./modifier-selection";
 export * from "./registry";
+export * from "./runtime";

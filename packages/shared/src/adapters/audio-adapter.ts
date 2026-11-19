@@ -1,10 +1,16 @@
 export type AudioCue =
-  | "button-press"
-  | "correct-guess"
-  | "incorrect-guess"
+  | "button-hover"
+  | "button-click"
+  | "correct-letter"
+  | "incorrect-letter"
+  | "combo"
+  | "countdown"
+  | "warning-10"
+  | "warning-5"
   | "hint"
-  | "round-won"
-  | "round-lost";
+  | "win"
+  | "lose"
+  | "ultra-max-reveal";
 
 export interface AudioAdapter {
   register(cue: AudioCue, source: string): Promise<void>;

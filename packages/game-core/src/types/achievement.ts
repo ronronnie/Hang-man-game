@@ -1,4 +1,13 @@
-export type AchievementId = string;
+export const ACHIEVEMENT_IDS = [
+  "first-blood",
+  "perfect",
+  "ultra-instinct",
+  "are-you-human",
+  "clutch",
+  "ten-in-a-row",
+] as const;
+
+export type AchievementId = (typeof ACHIEVEMENT_IDS)[number];
 
 export interface AchievementDefinition {
   id: AchievementId;
@@ -12,4 +21,9 @@ export interface AchievementProgress {
   achievementId: AchievementId;
   current: number;
   unlockedAt?: string;
+}
+
+export interface AchievementUnlock {
+  definition: Readonly<AchievementDefinition>;
+  unlockedAt: string;
 }

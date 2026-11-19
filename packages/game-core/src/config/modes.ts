@@ -1,11 +1,12 @@
 import type { GameModeDefinition, GameModeId } from "../types/mode";
 import { MODIFIER_IDS } from "../types/modifier";
+import { GAME_COPY } from "./copy";
 
 export const GAME_MODES = [
   {
     id: "i-know-this-game",
     label: "I Know This Game",
-    description: "The familiar word-guessing experience.",
+    description: GAME_COPY.modeCards["i-know-this-game"].supporting,
     ruleset: "standard",
     rules: {
       maximumIncorrectGuesses: 7,
@@ -15,8 +16,22 @@ export const GAME_MODES = [
       hints: {
         enabled: true,
         freeHints: 1,
-        reducesFinalScore: false,
-        costOptions: ["none"],
+        options: [
+          {
+            kind: "text-clue",
+            label: GAME_COPY.hints.optionLabels.text,
+            description: GAME_COPY.hints.optionDescriptions.classicClue,
+            cost: { type: "none" },
+            requiresConfirmation: false,
+          },
+          {
+            kind: "reveal-letter",
+            label: GAME_COPY.hints.optionLabels.reveal,
+            description: GAME_COPY.hints.optionDescriptions.classicReveal,
+            cost: { type: "none" },
+            requiresConfirmation: false,
+          },
+        ],
       },
       wordPool: { tier: "normal", difficulties: ["easy", "medium"] },
       scoreMultiplier: 1,
@@ -27,7 +42,7 @@ export const GAME_MODES = [
   {
     id: "ultra",
     label: "Ultra",
-    description: "An expanded ruleset for a more dynamic challenge.",
+    description: GAME_COPY.modeCards.ultra.supporting,
     ruleset: "ultra",
     rules: {
       maximumIncorrectGuesses: 5,
@@ -41,8 +56,22 @@ export const GAME_MODES = [
       hints: {
         enabled: true,
         freeHints: 0,
-        reducesFinalScore: true,
-        costOptions: ["score"],
+        options: [
+          {
+            kind: "text-clue",
+            label: GAME_COPY.hints.optionLabels.text,
+            description: GAME_COPY.hints.optionDescriptions.ultraClue,
+            cost: { type: "score-percent", percent: 10 },
+            requiresConfirmation: true,
+          },
+          {
+            kind: "reveal-letter",
+            label: GAME_COPY.hints.optionLabels.reveal,
+            description: GAME_COPY.hints.optionDescriptions.ultraReveal,
+            cost: { type: "score-percent", percent: 20 },
+            requiresConfirmation: true,
+          },
+        ],
       },
       wordPool: { tier: "harder", difficulties: ["medium", "hard"] },
       scoreMultiplier: 2,
@@ -53,7 +82,7 @@ export const GAME_MODES = [
   {
     id: "ultra-max",
     label: "Ultra Max",
-    description: "The most demanding mode, with additional modifiers.",
+    description: GAME_COPY.modeCards["ultra-max"].supporting,
     ruleset: "ultra-max",
     rules: {
       maximumIncorrectGuesses: 4,
@@ -67,8 +96,29 @@ export const GAME_MODES = [
       hints: {
         enabled: true,
         freeHints: 0,
-        reducesFinalScore: true,
-        costOptions: ["time", "score"],
+        options: [
+          {
+            kind: "show-category",
+            label: GAME_COPY.hints.optionLabels.category,
+            description: GAME_COPY.hints.optionDescriptions.ultraMaxCategory,
+            cost: { type: "time", seconds: 15 },
+            requiresConfirmation: true,
+          },
+          {
+            kind: "text-clue",
+            label: GAME_COPY.hints.optionLabels.text,
+            description: GAME_COPY.hints.optionDescriptions.ultraMaxClue,
+            cost: { type: "time", seconds: 10 },
+            requiresConfirmation: true,
+          },
+          {
+            kind: "reveal-letter",
+            label: GAME_COPY.hints.optionLabels.reveal,
+            description: GAME_COPY.hints.optionDescriptions.ultraMaxReveal,
+            cost: { type: "attempt", attempts: 1 },
+            requiresConfirmation: true,
+          },
+        ],
       },
       wordPool: { tier: "hardest", difficulties: ["hard", "brutal"] },
       scoreMultiplier: 4,
